@@ -1,0 +1,46 @@
+{
+  "name": "ajurmap/openweathermap-data-parser",
+  "description": "A PHP class to parse weather data from OpenWeatherMap.org. This library tries to normalise and abstract the data and remove inconsistencies",
+  "keywords": [
+    "weather",
+    "OpenWeatherMap",
+    "api",
+    "owm",
+    "free"
+  ],
+  "homepage": "https://github.com/cmfcmf/OpenWeatherMap-PHP-Api",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Christian Flach (cmfcmf)",
+      "email": "cmfcmf.flach@gmail.com",
+      "homepage": "http://cmfcmf.github.io",
+      "role": "Original developer"
+    },
+    {
+      "name": "Karel Wintersky",
+      "email": "vim@fontanka.ru",
+      "role": "Fork developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/ajur-media/openweathermap-data-parser/issues",
+    "source": "https://github.com/ajur-media/openweathermap-data-parser"
+  },
+  "require": {
+    "php": ">=7.0",
+    "ext-xml": "*",
+    "ext-curl": "*",
+    "ext-simplexml": "*",
+    "ext-json": "*",
+    "ext-libxml": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.0.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "AJUR\\": "sources"
+    }
+  }
+}
