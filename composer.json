@@ -1,5 +1,5 @@
 {
-  "name": "ajurmap/openweathermap-data-parser",
+  "name": "ajur-media/openweathermap-data-parser",
   "description": "A PHP class to parse weather data from OpenWeatherMap.org. This library tries to normalise and abstract the data and remove inconsistencies",
   "keywords": [
     "weather",
@@ -8,7 +8,7 @@
     "owm",
     "free"
   ],
-  "homepage": "https://github.com/cmfcmf/OpenWeatherMap-PHP-Api",
+  "homepage": "https://github.com/ajur-media/openweathermap-data-parser",
   "license": "MIT",
   "authors": [
     {

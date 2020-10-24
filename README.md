@@ -1,10 +1,12 @@
 OpenWeatherMap PHP API
 ======================
-A php API to retrieve and parse global weather data from 
-[OpenWeatherMap.org](http://www.OpenWeatherMap.org).
+
+A PHP class to retrieve and parse weather data from [OpenWeatherMap.org](http://www.OpenWeatherMap.org). 
+
 This library aims to normalise the provided data and remove some inconsistencies.
 This library is neither maintained by OpenWeatherMap nor their official PHP API.
 
+<!-- 
 [![Build Status](https://travis-ci.org/cmfcmf/OpenWeatherMap-PHP-Api.svg?branch=master)](https://travis-ci.org/cmfcmf/OpenWeatherMap-PHP-Api)
 [![license](https://img.shields.io/github/license/cmfcmf/OpenWeatherMap-PHP-Api.svg)](https://github.com/cmfcmf/OpenWeatherMap-PHP-Api/blob/master/LICENSE)
 [![release](https://img.shields.io/github/release/cmfcmf/OpenWeatherMap-PHP-Api.svg)](https://github.com/cmfcmf/OpenWeatherMap-PHP-Api/releases)
@@ -12,27 +14,28 @@ This library is neither maintained by OpenWeatherMap nor their official PHP API.
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/cmfcmf/OpenWeatherMap-PHP-Api/badges/quality-score.png?s=f31ca08aa8896416cf162403d34362f0a5da0966)](https://scrutinizer-ci.com/g/cmfcmf/OpenWeatherMap-PHP-Api/)
 <br>
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/0addfb24-e2b4-4feb-848e-86b2078ca104/big.png)](https://insight.sensiolabs.com/projects/0addfb24-e2b4-4feb-848e-86b2078ca104)
+-->
 
 Installation
 ============
 This library can be found on [Packagist](https://packagist.org/packages/cmfcmf/openweathermap-php-api).
 The recommended way to install and use it is through [Composer](http://getcomposer.org).
 
-    composer require "cmfcmf/openweathermap-php-api"
+    composer require ajur-media/openweathermap-data-parser
 
 
 Example call
 ============
 ```php
 <?php
-use Cmfcmf\OpenWeatherMap;
-use Cmfcmf\OpenWeatherMap\Exception as OWMException;
+use AJUR\OpenWeatherMap;
+use AJUR\OpenWeatherMap\Exception as OWMException;
 
 // Must point to composer's autoload file.
 require 'vendor/autoload.php';
 
 // Language of data (try your own language here!):
-$lang = 'de';
+$lang = 'ru';
 
 // Units (can be 'metric' or 'imperial' [default]):
 $units = 'metric';
@@ -52,29 +55,15 @@ try {
 echo $weather->temperature;
 ```
 
-For more example code and instructions on how to use this library, please take 
-a look into  the `Examples` folder. Make sure to get an API Key from 
-http://home.openweathermap.org/ and put it into `Examples/ApiKey.ini`.
+<!-- 
+For more example code and instructions on how to use this library, please take a look into  the `Docs` folder. 
+
+Make sure to get an API Key from http://home.openweathermap.org/ and put it into `Docs/ApiKey.ini`.
 - `CurrentWeather.php` Shows how to receive the current weather.
 - `WeatherForecast.php` Shows how to receive weather forecasts.
 - `WeatherHistory.php` Shows how to receive weather history.
 - `Cache.php` Shows how to implement and use a cache.
-
-Contributing
-============
-I'm happy about every **pull request** or **issue** you find and open to help 
-make this API **more awesome**.
-
-You can use [Vagrant](https://vagrantup.com) to kick-start your development.
-Simply run `vagrant up` and `vagrant ssh` to start a PHP VM with all 
-dependencies included.
-
-## Support me
-
-If you like my work, I'd really appreciate you buying me a coffee.
-Your donations help me put more time into Open-Source software development.
-
-<a href='https://ko-fi.com/cmfcmf' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+-->
 
 License
 =======
