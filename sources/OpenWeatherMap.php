@@ -503,7 +503,7 @@ class OpenWeatherMap
      */
     public function getRawCurrentUVIndexData($lat, $lon)
     {
-        if (!$this->apiKey) {
+        if ($this->apiKey === '') {
             throw new \RuntimeException('Before using this method, you must set the api key using ->setApiKey()');
         }
         if (!is_float($lat) || !is_float($lon)) {
@@ -530,7 +530,7 @@ class OpenWeatherMap
      */
     public function getRawUVIndexData($lat, $lon, $dateTime, $timePrecision = 'day')
     {
-        if (!$this->apiKey) {
+        if ($this->apiKey === '') {
             throw new \RuntimeException('Before using this method, you must set the api key using ->setApiKey()');
         }
         if (!is_float($lat) || !is_float($lon)) {
@@ -605,7 +605,7 @@ class OpenWeatherMap
     {
         $queryUrl = $this->buildQueryUrlParameter($query);
 
-        $url = $url."$queryUrl&units=$units&lang=$lang&mode=$mode&APPID=";
+        $url .= "$queryUrl&units=$units&lang=$lang&mode=$mode&APPID=";
         $url .= empty($appid) ? $this->apiKey : $appid;
 
         return $url;
@@ -720,7 +720,7 @@ class OpenWeatherMap
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new OWMException('OpenWeatherMap returned an invalid json object. JSON error was: ' . $this->json_last_error_msg());
         }
-        if (isset($json->message)) {
+        if (property_exists($json, 'message') && $json->message !== null) {
             throw new OWMException('An error occurred: '. $json->message);
         }
 

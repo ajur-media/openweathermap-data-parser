@@ -46,11 +46,7 @@ class Forecast extends CurrentWeather
     {
         $utctz = new \DateTimeZone('UTC');
 
-        if ($units == 'metric') {
-            $temperatureUnit = "&deg;C";
-        } else {
-            $temperatureUnit = 'F';
-        }
+        $temperatureUnit = $units == 'metric' ? "&deg;C" : 'F';
 
         $xml->temperature['value'] = round((floatval($xml->temperature['max']) + floatval($xml->temperature['min'])) / 2, 2);
 
@@ -58,12 +54,7 @@ class Forecast extends CurrentWeather
         $this->humidity = new Unit($xml->humidity['value'], $xml->humidity['unit']);
         $this->pressure = new Unit($xml->pressure['value'], $xml->pressure['unit']);
 
-        // This is kind of a hack, because the units are missing in the xml document.
-        if ($units == 'metric') {
-            $windSpeedUnit = 'm/s';
-        } else {
-            $windSpeedUnit = 'mph';
-        }
+        $windSpeedUnit = $units == 'metric' ? 'm/s' : 'mph';
 
         $this->wind = new Wind(
             new Unit($xml->windSpeed['mps'], $windSpeedUnit, $xml->windSpeed['name']),

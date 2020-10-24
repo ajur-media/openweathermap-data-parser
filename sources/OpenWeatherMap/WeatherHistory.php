@@ -74,11 +74,7 @@ class WeatherHistory implements \Iterator
 
         $utctz = new \DateTimeZone('UTC');
         foreach ($weatherHistory['list'] as $history) {
-            if (isset($history['rain'])) {
-                $units = array_keys($history['rain']);
-            } else {
-                $units = array(0 => null);
-            }
+            $units = isset($history['rain']) ? array_keys($history['rain']) : array(0 => null);
 
             $this->histories[] = new History(
                 $this->city,

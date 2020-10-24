@@ -93,12 +93,7 @@ class CurrentWeather
      */
     public function __construct($data, $units)
     {
-        // This is kind of a hack, because the units are missing in the document.
-        if ($units == 'metric') {
-            $windSpeedUnit = 'm/s';
-        } else {
-            $windSpeedUnit = 'mph';
-        }
+        $windSpeedUnit = $units == 'metric' ? 'm/s' : 'mph';
 
         $utctz = new \DateTimeZone('UTC');
 
@@ -129,7 +124,7 @@ class CurrentWeather
 
             // the rain field is not always present in the JSON response
             // and sometimes it contains the field '1h', sometimes the field '3h'
-            $rain = isset($data->rain) ? (array) $data->rain : array();
+            $rain = property_exists($data, 'rain') && $data->rain !== null ? (array) $data->rain : array();
             $rainUnit = !empty($rain) ? key($rain) : '';
             $rainValue = !empty($rain) ? current($rain) : 0.0;
             $this->precipitation = new Unit($rainValue, $rainUnit);

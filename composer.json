@@ -40,7 +40,7 @@
   },
   "autoload": {
     "psr-4": {
-      "AJUR\\": "sources"
+      "AJUR\\": "sources/"
     }
   }
 }
