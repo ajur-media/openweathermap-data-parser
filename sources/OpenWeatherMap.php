@@ -27,6 +27,8 @@ use AJUR\OpenWeatherMap\Fetcher\FetcherInterface;
 use AJUR\OpenWeatherMap\Fetcher\FileGetContentsFetcher;
 use AJUR\OpenWeatherMap\WeatherForecast;
 use AJUR\OpenWeatherMap\WeatherHistory;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Main class for the OpenWeatherMap-PHP-API. Only use this class.
@@ -41,7 +43,7 @@ class OpenWeatherMap
      *
      * @var string $copyright
      */
-    public const COPYRIGHT = "Weather data from <a href=\"https://openweathermap.org\">OpenWeatherMap.org</a>";
+    public const COPYRIGHT = 'Weather data from <a href="https://openweathermap.org">OpenWeatherMap.org</a>';
 
     /**
      * @var string The basic api url to fetch weather data from.
@@ -99,6 +101,11 @@ class OpenWeatherMap
     private string $apiKey = '';
 
     /**
+     * @var LoggerInterface|NullLogger
+     */
+    private $logger;
+
+    /**
      * Constructs the OpenWeatherMap object.
      *
      * @param string $apiKey  The OpenWeatherMap API key. Required and only optional for BC.
@@ -113,7 +120,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function __construct(string $apiKey = '', FetcherInterface $fetcher = null, $cache = false, int $seconds = 600)
+    public function __construct(string $apiKey = '', FetcherInterface $fetcher = null, $cache = false, int $seconds = 600, LoggerInterface $logger = null)
     {
         if (empty($apiKey)) {
             $seconds = $cache !== false ? $cache : 600;
@@ -139,9 +146,28 @@ class OpenWeatherMap
             $cache = false;
         }
 
+        $this->logger
+            = !is_null($logger)
+            ? $logger
+            : new NullLogger();
+
         $this->cache = $cache;
         $this->seconds = $seconds;
         $this->fetcher = $fetcher;
+    }
+
+    /**
+     * Set logger
+     *
+     * @param LoggerInterface|null $logger
+     * @return void
+     */
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger
+            = !is_null($logger)
+            ? $logger
+            : new NullLogger();
     }
 
     /**
@@ -716,14 +742,20 @@ class OpenWeatherMap
      * @return \stdClass
      * @throws OWMException If the content isn't valid JSON.
      */
-    private function parseJson($answer)
+    private function parseJson(string $answer)
     {
         $json = json_decode($answer);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new OWMException('OpenWeatherMap returned an invalid json object. JSON error was: ' . $this->json_last_error_msg());
+        $json_last_error = json_last_error();
+        if ($json_last_error !== JSON_ERROR_NONE) {
+            $this->logger->error("OWMException: OpenWeatherMap returned an invalid json data. JSON error is:", [ $json_last_error, $this->json_last_error_msg(), $answer ]);
+
+            throw new OWMException('OpenWeatherMap returned an invalid json object. JSON error is: ' . $this->json_last_error_msg());
         }
+
         if (property_exists($json, 'message') && $json->message !== null) {
-            throw new OWMException('An error occurred: '. $json->message);
+            $this->logger->error("OWMException: ", [ $json_last_error, $json->message ]);
+
+            throw new OWMException('An error occurred: ' . $json->message, $json_last_error);
         }
 
         return $json;
@@ -735,7 +767,14 @@ class OpenWeatherMap
             return json_last_error_msg();
         }
 
-        static $ERRORS = [JSON_ERROR_NONE => 'No error', JSON_ERROR_DEPTH => 'Maximum stack depth exceeded', JSON_ERROR_STATE_MISMATCH => 'State mismatch (invalid or malformed JSON)', JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded', JSON_ERROR_SYNTAX => 'Syntax error', JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'];
+        static $ERRORS = [
+            JSON_ERROR_NONE     => 'No error',
+            JSON_ERROR_DEPTH    => 'Maximum stack depth exceeded',
+            JSON_ERROR_STATE_MISMATCH => 'State mismatch (invalid or malformed JSON)',
+            JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
+            JSON_ERROR_SYNTAX => 'Syntax error',
+            JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'
+        ];
 
         $error = json_last_error();
         return $ERRORS[$error] ?? 'Unknown error';
