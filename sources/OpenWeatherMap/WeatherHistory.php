@@ -65,8 +65,8 @@ class WeatherHistory implements \Iterator
         $this->city = new City(
             $weatherHistory['city_id'],
             (is_string($query)) ? $query : null,
-            (isset($query['lat'])) ? $query['lat'] : null,
-            (isset($query['lon'])) ? $query['lon'] : null,
+            $query['lat'] ?? null,
+            $query['lon'] ?? null,
             $country,
             $population
         );
@@ -74,22 +74,23 @@ class WeatherHistory implements \Iterator
 
         $utctz = new \DateTimeZone('UTC');
         foreach ($weatherHistory['list'] as $history) {
-            $units = isset($history['rain']) ? array_keys($history['rain']) : array(0 => null);
+            $units = isset($history['rain']) ? array_keys($history['rain']) : [0 => null];
 
             $this->histories[] = new History(
                 $this->city,
                 $history['weather'][0],
-                array(
+                [
                     'now' => $history['main']['temp'],
                     'min' => $history['main']['temp_min'],
                     'max' => $history['main']['temp_max']
-                ),
+                ],
                 $history['main']['pressure'],
                 $history['main']['humidity'],
                 $history['clouds']['all'],
-                isset($history['rain']) ? array(
+                isset($history['rain']) ? [
                     'val' => $history['rain'][($units[0])],
-                    'unit' => $units[0]) : null,
+                    'unit' => $units[0]
+                ] : null,
                 $history['wind'],
                 \DateTime::createFromFormat('U', $history['dt'], $utctz));
         }

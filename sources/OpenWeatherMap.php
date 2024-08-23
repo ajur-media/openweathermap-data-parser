@@ -41,37 +41,37 @@ class OpenWeatherMap
      *
      * @var string $copyright
      */
-    const COPYRIGHT = "Weather data from <a href=\"https://openweathermap.org\">OpenWeatherMap.org</a>";
+    public const COPYRIGHT = "Weather data from <a href=\"https://openweathermap.org\">OpenWeatherMap.org</a>";
 
     /**
      * @var string The basic api url to fetch weather data from.
      */
-    private $weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?';
+    private string $weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?';
 
     /**
      * @var string The basic api url to fetch weather group data from.
      */
-    private $weatherGroupUrl = 'https://api.openweathermap.org/data/2.5/group?';
+    private string $weatherGroupUrl = 'https://api.openweathermap.org/data/2.5/group?';
 
     /**
      * @var string The basic api url to fetch weekly forecast data from.
      */
-    private $weatherHourlyForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast?';
+    private string $weatherHourlyForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast?';
 
     /**
      * @var string The basic api url to fetch daily forecast data from.
      */
-    private $weatherDailyForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast/daily?';
+    private string $weatherDailyForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast/daily?';
 
     /**
      * @var string The basic api url to fetch history weather data from.
      */
-    private $weatherHistoryUrl = 'https://history.openweathermap.org/data/2.5/history/city?';
+    private string $weatherHistoryUrl = 'https://history.openweathermap.org/data/2.5/history/city?';
 
     /**
      * @var string The basic api url to fetch uv index data from.
      */
-    private $uvIndexUrl = 'https://api.openweathermap.org/v3/uvi';
+    private string $uvIndexUrl = 'https://api.openweathermap.org/v3/uvi';
 
     /**
      * @var AbstractCache|bool $cache The cache to use.
@@ -86,7 +86,7 @@ class OpenWeatherMap
     /**
      * @var bool
      */
-    private $wasCached = false;
+    private bool $wasCached = false;
 
     /**
      * @var FetcherInterface The url fetcher.
@@ -96,13 +96,13 @@ class OpenWeatherMap
     /**
      * @var string
      */
-    private $apiKey = '';
+    private string $apiKey = '';
 
     /**
      * Constructs the OpenWeatherMap object.
      *
-     * @param string                $apiKey  The OpenWeatherMap API key. Required and only optional for BC.
-     * @param null|FetcherInterface $fetcher The interface to fetch the data from OpenWeatherMap. Defaults to
+     * @param string $apiKey  The OpenWeatherMap API key. Required and only optional for BC.
+     * @param FetcherInterface|null $fetcher The interface to fetch the data from OpenWeatherMap. Defaults to
      *                                       CurlFetcher() if cURL is available. Otherwise defaults to
      *                                       FileGetContentsFetcher() using 'file_get_contents()'.
      * @param bool|string           $cache   If set to false, caching is disabled. Otherwise this must be a class
@@ -113,12 +113,11 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function __construct($apiKey = '', $fetcher = null, $cache = false, $seconds = 600)
+    public function __construct(string $apiKey = '', FetcherInterface $fetcher = null, $cache = false, int $seconds = 600)
     {
-        if (!is_string($apiKey) || empty($apiKey)) {
-            // BC
+        if (empty($apiKey)) {
             $seconds = $cache !== false ? $cache : 600;
-            $cache = $fetcher !== null ? $fetcher : false;
+            $cache = $fetcher ?? false;
             $fetcher = $apiKey !== '' ? $apiKey : null;
         } else {
             $this->apiKey = $apiKey;
@@ -127,12 +126,15 @@ class OpenWeatherMap
         if ($cache !== false && !($cache instanceof AbstractCache)) {
             throw new \InvalidArgumentException('The cache class must implement the FetcherInterface!');
         }
+        
         if (!is_numeric($seconds)) {
             throw new \InvalidArgumentException('$seconds must be numeric.');
         }
+        
         if (!isset($fetcher)) {
             $fetcher = (function_exists('curl_version')) ? new CurlFetcher() : new FileGetContentsFetcher();
         }
+        
         if ($seconds == 0) {
             $cache = false;
         }
@@ -161,7 +163,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function getApiKey()
+    public function getApiKey(): string
     {
         return $this->apiKey;
     }
@@ -170,12 +172,9 @@ class OpenWeatherMap
      * Returns the current weather at the place you specified.
      *
      * @param array|int|string $query The place to get weather information for. For possible values see below.
-     * @param string           $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
-     * @param string           $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
-     *
-     * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
-     * @throws \InvalidArgumentException If an argument error occurs.
+     * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
      *
      * @return CurrentWeather The weather object.
      *
@@ -187,9 +186,12 @@ class OpenWeatherMap
      *
      * Zip code may specify country. e.g., "zip:77070" (Houston, TX, US) or "zip:500001,IN" (Hyderabad, India)
      *
+     * @throws \InvalidArgumentException If an argument error occurs.
+     *
+     * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
      * @api
      */
-    public function getWeather($query, $units = 'imperial', $lang = 'en', $appid = '')
+    public function getWeather($query, string $units = 'imperial', string $lang = 'en', string $appid = ''): CurrentWeather
     {
         $answer = $this->getRawWeatherData($query, $units, $lang, $appid, 'xml');
         $xml = $this->parseXML($answer);
@@ -200,19 +202,19 @@ class OpenWeatherMap
     /**
      * Returns the current weather for a group of city ids.
      *
-     * @param array  $ids   The city ids to get weather information for
+     * @param array $ids   The city ids to get weather information for
      * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
      * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
      * @param string $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
      *
-     * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
-     * @throws \InvalidArgumentException If an argument error occurs.
-     *
      * @return CurrentWeatherGroup
      *
+     * @throws \InvalidArgumentException If an argument error occurs.
+     *
+     * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
      * @api
      */
-    public function getWeatherGroup($ids, $units = 'imperial', $lang = 'en', $appid = '')
+    public function getWeatherGroup(array $ids, string $units = 'imperial', string $lang = 'en', string $appid = ''): CurrentWeatherGroup
     {
         $answer = $this->getRawWeatherGroupData($ids, $units, $lang, $appid);
         $json = $this->parseJson($answer);
@@ -225,19 +227,19 @@ class OpenWeatherMap
      * fewer results than requested due to a bug in the OpenWeatherMap API!
      *
      * @param array|int|string $query The place to get weather information for. For possible values see ::getWeather.
-     * @param string           $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
-     * @param string           $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
-     * @param int              $days  For how much days you want to get a forecast. Default 1, maximum: 16.
-     *
-     * @throws OpenWeatherMap\Exception If OpenWeatherMap returns an error.
-     * @throws \InvalidArgumentException If an argument error occurs.
+     * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
+     * @param int $days  For how much days you want to get a forecast. Default 1, maximum: 16.
      *
      * @return WeatherForecast
      *
+     * @throws \InvalidArgumentException If an argument error occurs.
+     *
+     * @throws OpenWeatherMap\Exception If OpenWeatherMap returns an error.
      * @api
      */
-    public function getWeatherForecast($query, $units = 'imperial', $lang = 'en', $appid = '', $days = 1)
+    public function getWeatherForecast($query, string $units = 'imperial', string $lang = 'en', string $appid = '', int $days = 1): WeatherForecast
     {
         if ($days <= 5) {
             $answer = $this->getRawHourlyForecastData($query, $units, $lang, $appid, 'xml');
@@ -256,19 +258,19 @@ class OpenWeatherMap
      * fewer results than requested due to a bug in the OpenWeatherMap API!
      *
      * @param array|int|string $query The place to get weather information for. For possible values see ::getWeather.
-     * @param string           $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
-     * @param string           $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
-     * @param int              $days  For how much days you want to get a forecast. Default 1, maximum: 16.
-     *
-     * @throws OpenWeatherMap\Exception If OpenWeatherMap returns an error.
-     * @throws \InvalidArgumentException If an argument error occurs.
+     * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
+     * @param int $days  For how much days you want to get a forecast. Default 1, maximum: 16.
      *
      * @return WeatherForecast
      *
+     * @throws \InvalidArgumentException If an argument error occurs.
+     *
+     * @throws OpenWeatherMap\Exception If OpenWeatherMap returns an error.
      * @api
      */
-    public function getDailyWeatherForecast($query, $units = 'imperial', $lang = 'en', $appid = '', $days = 1)
+    public function getDailyWeatherForecast($query, string $units = 'imperial', string $lang = 'en', string $appid = '', int $days = 1): WeatherForecast
     {
         if ($days > 16) {
             throw new \InvalidArgumentException('Error: forecasts are only available for the next 16 days. $days must be 16 or lower.');
@@ -284,26 +286,26 @@ class OpenWeatherMap
      *
      * @param array|int|string $query      The place to get weather information for. For possible values see ::getWeather.
      * @param \DateTime        $start
-     * @param int              $endOrCount
-     * @param string           $type       Can either be 'tick', 'hour' or 'day'.
-     * @param string           $units      Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang       The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
-     * @param string           $appid      Your app id, default ''. See http://openweathermap.org/appid for more details.
+     * @param int $endOrCount
+     * @param string $type       Can either be 'tick', 'hour' or 'day'.
+     * @param string $units      Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang       The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $appid      Your app id, default ''. See http://openweathermap.org/appid for more details.
+     *
+     * @return WeatherHistory
      *
      * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
      * @throws \InvalidArgumentException If an argument error occurs.
      *
-     * @return WeatherHistory
-     *
      * @api
      */
-    public function getWeatherHistory($query, \DateTime $start, $endOrCount = 1, $type = 'hour', $units = 'imperial', $lang = 'en', $appid = '')
+    public function getWeatherHistory($query, \DateTime $start, int $endOrCount = 1, string $type = 'hour', string $units = 'imperial', string $lang = 'en', string $appid = ''): WeatherHistory
     {
-        if (!in_array($type, array('tick', 'hour', 'day'))) {
+        if (!in_array($type, ['tick', 'hour', 'day'])) {
             throw new \InvalidArgumentException('$type must be either "tick", "hour" or "day"');
         }
 
-        $xml = json_decode($this->getRawWeatherHistory($query, $start, $endOrCount, $type, $units, $lang, $appid), true);
+        $xml = \json_decode($this->getRawWeatherHistory($query, $start, $endOrCount, $type, $units, $lang, $appid), true);
 
         if ($xml['cod'] != 200) {
             throw new OWMException($xml['message'], $xml['cod']);
@@ -315,8 +317,8 @@ class OpenWeatherMap
     /**
      * Returns the current uv index at the location you specified.
      *
-     * @param float              $lat           The location's latitude.
-     * @param float              $lon           The location's longitude.
+     * @param float $lat           The location's latitude.
+     * @param float $lon           The location's longitude.
      *
      * @throws OpenWeatherMap\Exception  If OpenWeatherMap returns an error.
      * @throws \InvalidArgumentException If an argument error occurs.
@@ -325,7 +327,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function getCurrentUVIndex($lat, $lon)
+    public function getCurrentUVIndex(float $lat, float $lon): UVIndex
     {
         $answer = $this->getRawCurrentUVIndexData($lat, $lon);
         $json = $this->parseJson($answer);
@@ -336,10 +338,10 @@ class OpenWeatherMap
     /**
      * Returns the uv index at date, time and location you specified.
      *
-     * @param float              $lat           The location's latitude.
-     * @param float              $lon           The location's longitude.
+     * @param float $lat           The location's latitude.
+     * @param float $lon           The location's longitude.
      * @param \DateTimeInterface $dateTime      The date and time to request data for.
-     * @param string             $timePrecision This decides about the timespan OWM will look for the uv index. The tighter
+     * @param string $timePrecision This decides about the timespan OWM will look for the uv index. The tighter
      *                                          the timespan, the less likely it is to get a result. Can be 'year', 'month',
      *                                          'day', 'hour', 'minute' or 'second', defaults to 'day'.
      *
@@ -350,7 +352,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function getUVIndex($lat, $lon, $dateTime, $timePrecision = 'day')
+    public function getUVIndex(float $lat, float $lon, \DateTimeInterface $dateTime, string $timePrecision = 'day'): UVIndex
     {
         $answer = $this->getRawUVIndexData($lat, $lon, $dateTime, $timePrecision);
         $json = $this->parseJson($answer);
@@ -362,10 +364,10 @@ class OpenWeatherMap
      * Directly returns the xml/json/html string returned by OpenWeatherMap for the current weather.
      *
      * @param array|int|string $query The place to get weather information for. For possible values see ::getWeather.
-     * @param string           $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
-     * @param string           $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
-     * @param string           $mode  The format of the data fetched. Possible values are 'json', 'html' and 'xml' (default).
+     * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
+     * @param string $mode  The format of the data fetched. Possible values are 'json', 'html' and 'xml' (default).
      *
      * @return string Returns false on failure and the fetched data in the format you specified on success.
      *
@@ -373,7 +375,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function getRawWeatherData($query, $units = 'imperial', $lang = 'en', $appid = '', $mode = 'xml')
+    public function getRawWeatherData($query, string $units = 'imperial', string $lang = 'en', string $appid = '', string $mode = 'xml')
     {
         $url = $this->buildUrl($query, $units, $lang, $appid, $mode, $this->weatherUrl);
 
@@ -404,8 +406,8 @@ class OpenWeatherMap
      * Directly returns the xml/json/html string returned by OpenWeatherMap for the hourly forecast.
      *
      * @param array|int|string $query The place to get weather information for. For possible values see ::getWeather.
-     * @param string           $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
-     * @param string           $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
+     * @param string $units Can be either 'metric' or 'imperial' (default). This affects almost all units returned.
+     * @param string $lang  The language to use for descriptions, default is 'en'. For possible values see http://openweathermap.org/current#multi.
      * @param string           $appid Your app id, default ''. See http://openweathermap.org/appid for more details.
      * @param string           $mode  The format of the data fetched. Possible values are 'json', 'html' and 'xml' (default).
      *
@@ -415,7 +417,7 @@ class OpenWeatherMap
      *
      * @api
      */
-    public function getRawHourlyForecastData($query, $units = 'imperial', $lang = 'en', $appid = '', $mode = 'xml')
+    public function getRawHourlyForecastData($query, string $units = 'imperial', string $lang = 'en', $appid = '', $mode = 'xml')
     {
         $url = $this->buildUrl($query, $units, $lang, $appid, $mode, $this->weatherHourlyForecastUrl);
 
@@ -474,7 +476,7 @@ class OpenWeatherMap
      */
     public function getRawWeatherHistory($query, \DateTime $start, $endOrCount = 1, $type = 'hour', $units = 'imperial', $lang = 'en', $appid = '')
     {
-        if (!in_array($type, array('tick', 'hour', 'day'))) {
+        if (!in_array($type, ['tick', 'hour', 'day'])) {
             throw new \InvalidArgumentException('$type must be either "tick", "hour" or "day"');
         }
 
@@ -619,7 +621,7 @@ class OpenWeatherMap
      *
      * @return string
      */
-    private function buildUVIndexUrl($lat, $lon, $dateTime = null, $timePrecision = null)
+    private function buildUVIndexUrl($lat, $lon, $dateTime = null, $timePrecision = null): string
     {
         if ($dateTime !== null) {
             $format = '\Z';
@@ -701,7 +703,7 @@ class OpenWeatherMap
             // OpenWeatherMap always uses json for errors, even if one specifies xml as format.
             $error = json_decode($answer, true);
             if (isset($error['message'])) {
-                throw new OWMException($error['message'], isset($error['cod']) ? $error['cod'] : 0);
+                throw new OWMException($error['message'], $error['cod'] ?? 0);
             } else {
                 throw new OWMException('Unknown fatal error: OpenWeatherMap returned the following json object: ' . $answer);
             }
@@ -733,16 +735,9 @@ class OpenWeatherMap
             return json_last_error_msg();
         }
 
-        static $ERRORS = array(
-            JSON_ERROR_NONE => 'No error',
-            JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
-            JSON_ERROR_STATE_MISMATCH => 'State mismatch (invalid or malformed JSON)',
-            JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
-            JSON_ERROR_SYNTAX => 'Syntax error',
-            JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'
-        );
+        static $ERRORS = [JSON_ERROR_NONE => 'No error', JSON_ERROR_DEPTH => 'Maximum stack depth exceeded', JSON_ERROR_STATE_MISMATCH => 'State mismatch (invalid or malformed JSON)', JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded', JSON_ERROR_SYNTAX => 'Syntax error', JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'];
 
         $error = json_last_error();
-        return isset($ERRORS[$error]) ? $ERRORS[$error] : 'Unknown error';
+        return $ERRORS[$error] ?? 'Unknown error';
     }
 }

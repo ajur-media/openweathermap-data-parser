@@ -124,7 +124,7 @@ class CurrentWeather
 
             // the rain field is not always present in the JSON response
             // and sometimes it contains the field '1h', sometimes the field '3h'
-            $rain = property_exists($data, 'rain') && $data->rain !== null ? (array) $data->rain : array();
+            $rain = property_exists($data, 'rain') && $data->rain !== null ? (array) $data->rain : [];
             $rainUnit = !empty($rain) ? key($rain) : '';
             $rainValue = !empty($rain) ? current($rain) : 0.0;
             $this->precipitation = new Unit($rainValue, $rainUnit);

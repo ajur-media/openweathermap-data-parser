@@ -44,6 +44,7 @@ class UVIndex
      *
      * @param object $data
      *
+     * @throws \Exception
      * @internal
      */
     public function __construct($data)
