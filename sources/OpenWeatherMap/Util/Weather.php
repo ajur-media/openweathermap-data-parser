@@ -20,7 +20,7 @@ namespace AJUR\OpenWeatherMap\Util;
 /**
  * The weather class representing a weather object.
  */
-class Weather
+class Weather implements \Stringable
 {
     /**
      * @var int The weather id.
@@ -65,7 +65,7 @@ class Weather
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->description;
     }

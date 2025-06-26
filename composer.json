@@ -19,7 +19,7 @@
     },
     {
       "name": "Karel Wintersky",
-      "email": "vim@fontanka.ru",
+      "email": "wombat@fontanka.ru",
       "role": "Fork developer"
     }
   ],
@@ -28,7 +28,7 @@
     "source": "https://github.com/ajur-media/openweathermap-data-parser"
   },
   "require": {
-    "php": "^7.4 | 8.*",
+    "php": "^8.2",
     "psr/log": "*",
     "ext-xml": "*",
     "ext-curl": "*",

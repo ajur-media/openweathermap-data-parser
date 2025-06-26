@@ -20,7 +20,7 @@ namespace AJUR\OpenWeatherMap\Util;
 /**
  * The temperature class representing a temperature object.
  */
-class Temperature
+class Temperature implements \Stringable
 {
     /**
      * @var Unit The current temperature.
@@ -62,7 +62,7 @@ class Temperature
      *
      * @return string The current temperature as a formatted string.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->now->__toString();
     }

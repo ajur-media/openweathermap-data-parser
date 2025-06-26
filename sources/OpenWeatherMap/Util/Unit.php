@@ -20,7 +20,7 @@ namespace AJUR\OpenWeatherMap\Util;
 /**
  * The unit class representing a unit object.
  */
-class Unit
+class Unit implements \Stringable
 {
     /**
      * @var float The value.
@@ -66,7 +66,7 @@ class Unit
      *
      * The unit is not included if it is empty.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getFormatted();
     }

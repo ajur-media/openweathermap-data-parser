@@ -86,12 +86,10 @@ class CurrentWeather
     /**
      * Create a new weather object.
      *
-     * @param mixed  $data
      * @param string $units
-     *
      * @internal
      */
-    public function __construct($data, $units)
+    public function __construct(mixed $data, $units)
     {
         $windSpeedUnit = $units == 'metric' ? 'm/s' : 'mph';
 
